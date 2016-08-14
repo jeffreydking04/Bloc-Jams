@@ -29,7 +29,7 @@ body {
 }
 
 .navbar .links-container {
-  display: table-cell;
+  display: table;
   position: absolute;
   top: 0;
   right: 0;
@@ -56,6 +56,11 @@ body {
 
 .links-container .navbar-link:hover {
   color: rgb(233,50,117);
+}
+
+.links-container .navbar-link:active {
+  color: rgb(233,50,117);
+  background-color: white;
 }
 
 .container {
