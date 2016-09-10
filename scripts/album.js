@@ -60,14 +60,24 @@ var setCurrentAlbum = function(album) {
 };
 
 var findParentByClassName = function(givenElement, givenClassName) {
-  var potentialElement = givenElement;
+  if(!givenElement.parentElement) {
+    alert("No parent found");
+  }
+  var potentialElement = givenElement.parentElement;
   while(potentialElement.className !== givenClassName) {
-    potentialElement = potentialElement.parentElement;
+    if(potentialElement.parentElement) {
+      potentialElement = potentialElement.parentElement;
+    } else {
+      alert("No parent found with that class name.");
+    }
   }
   return potentialElement;
 };
 
 var getSongItem = function(givenElement) {
+  if(givenElement.className === 'album-view-song-item') {
+    return givenElement.childNodes[1];
+  }
   var songItem = findParentByClassName(givenElement, 'album-view-song-item');
   return songItem.childNodes[1];
 };
