@@ -28,6 +28,21 @@ var albumMarconi = {
   ]
 };
 
+var albumSeattle = {
+  title: 'The Mission',
+  artist: 'RW3',
+  label: 'Reign City Productions',
+  year: '2016',
+  albumArtUrl: 'assets/images/album_covers/21.png',
+  songs: [
+    { title: 'The Race for Glory', duration: '19:00' },
+    { title: 'Russian Rawls', duration: '5:23' },
+    { title: 'This Cracker Catches Fire', duration: '16:55'},
+    { title: 'Houston On Our Mind', duration: '2:17' },
+    { title: '1', duration: '35:03'}
+  ]
+};
+
 var createSongRow = function(songNumber, songName, songLength) {
   var template =
     '<tr class="album-view-song-item">'
@@ -61,6 +76,23 @@ var setCurrentAlbum = function(album) {
   }
 };
 
+
+
 window.onload = function() {
-  setCurrentAlbum(albumMarconi);
+  var currentAlbum = albumSeattle;
+  setCurrentAlbum(currentAlbum);
+  var albumElement = document.getElementsByClassName('album-cover-art')[0];
+
+  albumElement.addEventListener("click", function(event) {
+    if (currentAlbum === albumSeattle) {
+      currentAlbum = albumPicasso;
+    }
+    else if (currentAlbum === albumPicasso) {
+      currentAlbum = albumMarconi;
+    }
+    else {
+      currentAlbum = albumSeattle;
+    }
+    setCurrentAlbum(currentAlbum);
+  });
 };
