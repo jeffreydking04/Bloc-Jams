@@ -13,14 +13,18 @@ var createSongRow = function(songNumber, songName, songLength) {
     var $songItem = $(this);
     var songNumber = parseInt($(this).attr('data-song-number'));
 
+    updateSeekPercentage($('.volume .seek-bar'), currentVolume / 100);
+
     if(currentlyPlayingSongNumber === null) {
       $songItem.html(pauseButtonTemplate);
       setSong(songNumber);
       currentSoundFile.play();
+      updateSeekBarWhileSongPlays();
     } else if(currentlyPlayingSongNumber === songNumber) {
       if(currentSoundFile.isPaused()) {
         $songItem.html(pauseButtonTemplate);
         currentSoundFile.play();
+        updateSeekBarWhileSongPlays();
       } else {
         currentSoundFile.pause();
         $songItem.html(playButtonTemplate);
@@ -31,6 +35,7 @@ var createSongRow = function(songNumber, songName, songLength) {
       $songItem.html(pauseButtonTemplate);
       setSong(songNumber);
       currentSoundFile.play();
+      updateSeekBarWhileSongPlays();
     }
 
     updatePlayerBarSong();
@@ -105,6 +110,7 @@ $(document).ready(function() {
   $previousButton.click(previousSong);
   $nextButton.click(nextSong);
   $playPauseButton.click(togglePlayFromPlayerBar);
+  setupSekBars();
 });
 
 var updatePlayerBarSong = function() {
@@ -120,6 +126,68 @@ var updatePlayerBarSong = function() {
     $('.main-controls .play-pause').html(playerBarPlayButton);
   }
 
+};
+
+var updateSeekBarWhileSongPlays = function() {
+  if(currentSoundFile) {
+    currentSoundFile.bind('timeupdate', function(event) {
+      var seekBarFillRatio = this.getTime() / this.getDuration();
+      var $seekBar = $('.seek-control .seek-bar');
+
+      updateSeekPercentage($seekBar, seekBarFillRatio);
+    });
+  }
+};
+
+var updateSeekPercentage = function($seekBar, seekBarFillRatio) {
+  var offsetXPercent = seekBarFillRatio * 100;
+  offsetXPercent = Math.max(0, offsetXPercent);
+  offsetXPercent = Math.min(100, offsetXPercent);
+
+  var percentageString = offsetXPercent + '%';
+  $seekBar.find('.fill').width(percentageString);
+  $seekBar.find('.thumb').css({left: percentageString});
+};
+
+var setupSekBars = function() {
+  var $seekBars = $('.player-bar .seek-bar');
+
+  $seekBars.click(function(event) {
+    var offsetX = event.pageX - $(this).offset().left;
+    var barWidth = $(this).width();
+    var seekBarFillRatio = offsetX / barWidth;
+
+    updateSeekPercentage($(this), seekBarFillRatio);
+
+    if($(this).parent().hasClass('seek-control')) {
+      seek(seekBarFillRatio * currentSongFromAlbum.duration)
+    } else {
+      setVolume(seekBarFillRatio * 100);
+    }
+  });
+
+  $seekBars.find('.thumb').mousedown(function(event) {
+      var $seekBar = $(this).parent();
+
+      $(document).bind('mousemove.thumb', function(event){
+        var offsetX = event.pageX - $seekBar.offset().left;
+        var barWidth = $seekBar.width();
+        var seekBarFillRatio = offsetX / barWidth;
+
+        updateSeekPercentage($seekBar, seekBarFillRatio);
+
+        if($seekBar.parent().hasClass('seek-control')) {
+          seek(seekBarFillRatio * currentSongFromAlbum.duration)
+        } else {
+          setVolume(seekBarFillRatio * 100);
+        }
+      });
+
+      $(document).bind('mouseup.thumb', function() {
+          $(document).unbind('mousemove.thumb');
+          $(document).unbind('mouseup.thumb');
+      });
+  });
 };
 
 var nextSong = function() {
@@ -139,6 +207,7 @@ var nextSong = function() {
   $($nextSongNumberElement).html(pauseButtonTemplate);
   setSong(nextSongIndex + 1);
   currentSoundFile.play();
+  updateSeekBarWhileSongPlays();
   updatePlayerBarSong();
 };
 
@@ -159,6 +228,7 @@ var previousSong = function() {
   $($previousSongNumberElement).html(pauseButtonTemplate);
   setSong(previousSongIndex + 1);
   currentSoundFile.play();
+  updateSeekBarWhileSongPlays();
   updatePlayerBarSong();
 };
 
@@ -188,6 +258,12 @@ var setSong = function(songNumber) {
   });
 
   setVolume(currentVolume);
+};
+
+var seek = function(time) {
+  if(currentSoundFile) {
+    currentSoundFile.setTime(time);
+  }
 };
 
 var setVolume = function(volume) {
