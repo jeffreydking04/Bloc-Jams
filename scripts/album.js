@@ -93,8 +93,12 @@ var $nextButton = $('.main-controls .next');
 
 $(document).ready(function() {
   setCurrentAlbum(albumMarconi);
-  $previousButton.click(previousSong);
-  $nextButton.click(nextSong);
+  $previousButton.click(function() {
+    adjacentSong("previous");
+  });
+  $nextButton.click(function() {
+    adjacentSong("next");
+  });
 });
 
 var updatePlayerBarSong = function() {
@@ -112,41 +116,30 @@ var updatePlayerBarSong = function() {
 
 };
 
-var nextSong = function() {
+var adjacentSong = function(direction) {
   var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum);
   var $currentSongNumberElement = getSongNumberCell(currentSongIndex + 1);
   var lastSongIndex = currentAlbum.songs.length - 1;
-  var nextSongIndex;
+  var adjacentSongIndex;
 
-  if(currentSongIndex === null || currentSongIndex === lastSongIndex) {
-    nextSongIndex = 0;
-  } else {
-    nextSongIndex = currentSongIndex + 1;
+  if(direction === "next") {
+    if(currentSongIndex === -1 || currentSongIndex === lastSongIndex) {
+      adjacentSongIndex = 0;
+    } else {
+      adjacentSongIndex = currentSongIndex + 1;
+    }
+  } else if(direction === "previous") {
+    if(currentSongIndex === -1 || currentSongIndex === 0) {
+      adjacentSongIndex = lastSongIndex;
+    } else {
+      adjacentSongIndex = currentSongIndex - 1;
+    }
   }
 
-  var $nextSongNumberElement = getSongNumberCell(nextSongIndex + 1);
+  var $nextSongNumberElement = getSongNumberCell(adjacentSongIndex + 1);
   $($currentSongNumberElement).html($($currentSongNumberElement).attr('data-song-number'));
   $($nextSongNumberElement).html(pauseButtonTemplate);
-  setSong(nextSongIndex + 1);
-  updatePlayerBarSong();
-};
-
-var previousSong = function() {
-  var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum);
-  var $currentSongNumberElement = getSongNumberCell(currentSongIndex + 1);
-  var lastSongIndex = currentAlbum.songs.length - 1;
-  var previousSongIndex;
-
-  if(currentSongIndex === null || currentSongIndex === 0) {
-    previousSongIndex = lastSongIndex;
-  } else {
-    previousSongIndex = currentSongIndex - 1;
-  }
-
-  var $previousSongNumberElement = getSongNumberCell(previousSongIndex + 1);
-  $($currentSongNumberElement).html($($currentSongNumberElement).attr('data-song-number'));
-  $($previousSongNumberElement).html(pauseButtonTemplate);
-  setSong(previousSongIndex + 1);
+  setSong(adjacentSongIndex + 1);
   updatePlayerBarSong();
 };
 
